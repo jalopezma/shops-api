@@ -20,10 +20,11 @@ func main() {
 	log.Printf("\nMain: %#v\n", shops)
 
 	router := mux.NewRouter()
-	router.HandleFunc("/shop", GetShops).Methods("GET")
-	router.HandleFunc("/shop/{id:[a-zA-Z-]}", GetShop).Methods("GET")
-	router.HandleFunc("/shop/{id:[a-zA-Z-]}", CreateShop).Methods("POST")
-	router.HandleFunc("/shop/{id:[a-zA-Z-]}", DeleteShop).Methods("DELETE")
+	v1 := router.PathPrefix("/v1").Subrouter()
+	v1.HandleFunc("/shop", GetShops).Methods("GET")
+	v1.HandleFunc("/shop/{id:[a-zA-Z-]}", GetShop).Methods("GET")
+	v1.HandleFunc("/shop/{id:[a-zA-Z-]}", CreateShop).Methods("POST")
+	v1.HandleFunc("/shop/{id:[a-zA-Z-]}", DeleteShop).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
 
