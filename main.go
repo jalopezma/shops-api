@@ -2,12 +2,41 @@ package main
 
 import (
 	"log"
-	"net/http"
+	"os"
 
 	"github.com/jalopezma/shops-api/handlers"
+	"github.com/phyber/negroni-gzip/gzip"
+	"github.com/rs/cors"
+	"github.com/urfave/negroni"
 )
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+	log.Printf("Port: %v\n", port)
+
+	env := os.Getenv("APP_ENV")
+	if env == "PRODUCTION" {
+		log.Printf("APP_ENV: Production %q", env)
+	} else if env == "DEVELOPMENT" {
+		log.Printf("APP_ENV: Development %q", env)
+	}
+
 	router := handlers.NewRouter()
-	log.Fatal(http.ListenAndServe(":8000", router))
+
+	n := negroni.Classic()
+	// CORS for * or https://*.foo.com origins, allowing:
+	options := cors.New(cors.Options{
+		//		AllowedOrigins:   []string{"http://localhost:8000", "http://localhost:4200", "*.stratabet.com", "*.stratasport.com", "http://stratasport.com", "*stratatips.co", "*stratapro.co"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Accept-Encoding", "Authorization", "Content-Type", "Content-Length", "X-CSRF-Token", "Origin", "Upgrade", "Access-Control-Allow-Origin"},
+		AllowCredentials: true,
+	})
+
+	n.Use(options)
+	n.Use(gzip.Gzip(gzip.DefaultCompression))
+	n.UseHandler(router)
+	n.Run(":" + port)
 }
