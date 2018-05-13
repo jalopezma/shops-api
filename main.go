@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/jalopezma/shops-api/config"
 	"github.com/jalopezma/shops-api/handlers"
 	"github.com/phyber/negroni-gzip/gzip"
 	"github.com/rs/cors"
@@ -18,11 +19,14 @@ func main() {
 	log.Printf("Port: %v\n", port)
 
 	env := os.Getenv("APP_ENV")
-	if env == "PRODUCTION" {
+	if env == "PROD" {
 		log.Printf("APP_ENV: Production %q", env)
-	} else if env == "DEVELOPMENT" {
+	} else if env == "DEV" {
 		log.Printf("APP_ENV: Development %q", env)
+	} else {
+		env = "dev"
 	}
+	config.InitDeps(env)
 
 	router := handlers.NewRouter()
 

@@ -1,0 +1,4 @@
+mongo:
+    hosts:
+        - 172.18.0.2
+    db_name: test
