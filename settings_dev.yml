@@ -1,4 +1,7 @@
 mongo:
     hosts:
-        - 172.18.0.2
+        - 172.18.0.2:27017
     db_name: test
+    collections:
+        user: user
+        shops: shops
