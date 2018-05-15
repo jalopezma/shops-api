@@ -3,7 +3,10 @@ package config
 import (
 	"io/ioutil"
 	"log"
+	"strings"
 
+	"github.com/jalopezma/shops-api/common"
+	"github.com/jalopezma/shops-api/providers"
 	"gopkg.in/yaml.v2"
 )
 
@@ -19,9 +22,10 @@ type MongoAccess struct {
 // Config settings file
 type Config struct {
 	Mongo struct {
-		Hosts      []string `yaml:"hosts"`
-		DbName     string   `yaml:"db_name"`
-		ReplicaSet string   `yaml:"replica_set,omitempty"`
+		Hosts       []string    `yaml:"hosts"`
+		DbName      string      `yaml:"db_name"`
+		ReplicaSet  string      `yaml:"replica_set,omitempty"`
+		Collections Collections `yaml:"collections"`
 	} `yaml:"mongo"`
 
 	Redis struct {
@@ -31,9 +35,16 @@ type Config struct {
 	} `yaml:"redis"`
 }
 
+// Collections yaml struct
+type Collections struct {
+	Users string `yaml:"users"`
+	Shops string `yaml:"shops"`
+}
+
 // GetConfig parses the file to config struct
 func GetConfig(env, configPath string) Config {
 
+	env = strings.ToLower(env)
 	configFile := configPath + "settings_" + env + ".yml"
 
 	yamlFile, err := ioutil.ReadFile(configFile)
@@ -52,5 +63,16 @@ func GetConfig(env, configPath string) Config {
 // InitDeps - Reads settings file and sets dependencies
 func InitDeps(env string) {
 	GetConfig(env, "./")
-	log.Printf("\n%#v\n", config)
+	log.Printf("\n%+v\n", config.Mongo)
+	common.ConnectMongo(config.Mongo.Hosts[0], config.Mongo.DbName)
+
+	shopsSession := common.GetMongoSession()
+	shops := providers.ShopsProvider{
+		Session:    shopsSession,
+		Collection: shopsSession.DB(config.Mongo.DbName).C(config.Mongo.Collections.Shops),
+	}
+
+	common.Deps = common.Dependencies{
+		Shops: &shops,
+	}
 }
