@@ -11,15 +11,7 @@ import (
 
 var shops []schemas.Shop
 
-/*
-shops := []schemas.Shop{}
-shops = append(shops, schemas.Shop{ID: 0, UniqueName: "car-workshop", Name: "Car Workshop", ExtendedName: "", Address: "1 Colcester Road", PostalCode: "ABC 123", Category: "Cars"})
-shops = append(shops, schemas.Shop{ID: 1, UniqueName: "clarks", Name: "Clarks", ExtendedName: "", Address: "2 Oxford", PostalCode: "234 AAA", Category: "Shoes"})
-shops = append(shops, schemas.Shop{ID: 2, UniqueName: "morrisons", Name: "Morrisons", ExtendedName: "", Address: "3 Regents", PostalCode: "142 WWW", Category: "Groceries"})
-log.Printf("\nHandlers shop: %#v\n", shops)
-*/
-
-// GetShops -
+// Shops -
 func Shops(w http.ResponseWriter, r *http.Request) {
 	log.Printf("\nShops: %#v\n", shops)
 	json.NewEncoder(w).Encode(shops)
