@@ -1,7 +1,14 @@
 mongo:
     hosts:
-        - 172.18.0.2:27017
-    db_name: test
+        - cluster0-shard-00-00-jwgeq.mongodb.net:27017
+        - cluster0-shard-00-01-jwgeq.mongodb.net:27017
+        - cluster0-shard-00-02-jwgeq.mongodb.net:27017
+    user: cluster_ro
+    password: cluster_ro
+    db_name: cisco_test
+    replica_set: Cluster0-shard-0
+    ssl: true
+    auth_source: admin
     collections:
         user: user
         shops: shops
