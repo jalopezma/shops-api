@@ -33,16 +33,17 @@ func ConnectMongo(hosts []string, dbName string, user string, password string, r
 
 	mgoSession = mgoData{}
 	mgoSession.dialInfo = &mgo.DialInfo{
-		Addrs:    hosts,
-		Database: dbName,
-		Username: user,
-		Password: password,
+		Addrs:          hosts,
+		Database:       dbName,
+		Username:       user,
+		Password:       password,
+		ReplicaSetName: replicaSet,
+		Source:         authSource,
 		DialServer: func(addr *mgo.ServerAddr) (net.Conn, error) {
 			return tls.Dial("tcp", addr.String(), &tls.Config{})
 		},
 		Timeout: time.Second * 10,
 	}
-	log.Printf("[ConnectMongo] DialInfo: %+v", mgoSession.dialInfo)
 
 	mgoSession.session, err = mgo.DialWithInfo(mgoSession.dialInfo)
 	if err != nil {
@@ -50,6 +51,5 @@ func ConnectMongo(hosts []string, dbName string, user string, password string, r
 	}
 
 	mgoSession.db = mgoSession.session.DB(dbName)
-	//log.Printf("\n%+v\n%+v", mgoSession.dialInfo, mgoSession.db)
 	return mgoSession.session.Clone()
 }
