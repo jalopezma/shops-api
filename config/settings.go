@@ -23,8 +23,12 @@ type MongoAccess struct {
 type Config struct {
 	Mongo struct {
 		Hosts       []string    `yaml:"hosts"`
+		User        string      `yaml:"user"`
+		Password    string      `yaml:"password"`
 		DbName      string      `yaml:"db_name"`
-		ReplicaSet  string      `yaml:"replica_set,omitempty"`
+		ReplicaSet  string      `yaml:"replica_set"`
+		Ssl         bool        `yaml:"ssl"`
+		AuthSource  string      `yaml:"auth_source"`
 		Collections Collections `yaml:"collections"`
 	} `yaml:"mongo"`
 
@@ -63,8 +67,7 @@ func GetConfig(env, configPath string) Config {
 // InitDeps - Reads settings file and sets dependencies
 func InitDeps(env string) {
 	GetConfig(env, "./")
-	log.Printf("\n%+v\n", config.Mongo)
-	common.ConnectMongo(config.Mongo.Hosts[0], config.Mongo.DbName)
+	common.ConnectMongo(config.Mongo.Hosts, config.Mongo.DbName, config.Mongo.User, config.Mongo.Password, config.Mongo.ReplicaSet, config.Mongo.Ssl, config.Mongo.AuthSource)
 
 	shopsSession := common.GetMongoSession()
 	shops := providers.ShopsProvider{

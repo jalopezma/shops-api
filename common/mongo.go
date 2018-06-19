@@ -1,7 +1,10 @@
 package common
 
 import (
+	"crypto/tls"
 	"log"
+	"net"
+	"time"
 
 	"gopkg.in/mgo.v2"
 )
@@ -24,23 +27,29 @@ func GetMongoSession() (session *mgo.Session) {
 }
 
 // ConnectMongo - Connects mongo and returns a clone of the session
-func ConnectMongo(url string, db string) *mgo.Session {
+func ConnectMongo(hosts []string, dbName string, user string, password string, replicaSet string, ssl bool, authSource string) *mgo.Session {
+
 	var err error
-	// to improve this
-	log.Printf("[ConnectMongo] url: %q", url)
 
 	mgoSession = mgoData{}
-	mgoSession.dialInfo, err = mgo.ParseURL(url)
-	if err != nil {
-		log.Printf("[ConnectMongo] Couldn't parse mongodb url %q\n%v", url, err)
+	mgoSession.dialInfo = &mgo.DialInfo{
+		Addrs:          hosts,
+		Database:       dbName,
+		Username:       user,
+		Password:       password,
+		ReplicaSetName: replicaSet,
+		Source:         authSource,
+		DialServer: func(addr *mgo.ServerAddr) (net.Conn, error) {
+			return tls.Dial("tcp", addr.String(), &tls.Config{})
+		},
+		Timeout: time.Second * 10,
 	}
 
-	mgoSession.session, err = mgo.Dial(url)
+	mgoSession.session, err = mgo.DialWithInfo(mgoSession.dialInfo)
 	if err != nil {
-		log.Fatal("[ConnectMongo] Failed to start the Mongo session")
+		log.Fatalf("[ConnectMongo] Failed to start the Mongo session: %v", err.Error())
 	}
 
-	mgoSession.db = mgoSession.session.DB(db)
-	//log.Printf("\n%+v\n%+v", mgoSession.dialInfo, mgoSession.db)
+	mgoSession.db = mgoSession.session.DB(dbName)
 	return mgoSession.session.Clone()
 }
