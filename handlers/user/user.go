@@ -23,7 +23,7 @@ func GetToken(w http.ResponseWriter, r *http.Request) {
 
 	/* Set token claims */
 	claims["admin"] = true
-	claims["name"] = "Ado Kukic"
+	claims["name"] = "Jose Lopez"
 	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 
 	/* Sign the token with our secret */
